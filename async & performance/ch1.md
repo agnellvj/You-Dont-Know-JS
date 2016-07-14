@@ -1,7 +1,7 @@
 # You Don't Know JS: Async & Performance
 # Chapter 1: Asynchrony: Now & Later
 
-One of the most important and yet often misunderstood parts of programming in a language like JavaScript is understanding how to express and manipulate program behavior spread out over a period of time.
+One of the most important and yet often misunderstood parts of programming in a language like JavaScript is how to express and manipulate program behavior spread out over a period of time.
 
 This is not just about what happens from the beginning of a `for` loop to the end of a `for` loop, which of course takes *some time* (microseconds to milliseconds) to complete. It's about what happens when part of your program runs *now*, and another part of your program runs *later* -- there's a gap between *now* and *later* where your program isn't actively executing.
 
@@ -26,10 +26,11 @@ The problem most developers new to JS seem to have is that *later* doesn't happe
 Consider:
 
 ```js
-// ajax(..) is some arbitrary Ajax function given by some library
+// ajax(..) is some arbitrary Ajax function given by a library
 var data = ajax( "http://some.url.1" );
 
-console.log( data ); // Oops! `data` generally won't have the Ajax results
+console.log( data );
+// Oops! `data` generally won't have the Ajax results
 ```
 
 You're probably aware that standard Ajax requests don't complete synchronously, which means the `ajax(..)` function does not yet have any value to return back to be assigned to `data` variable. If `ajax(..)` *could* block until the response came back, then the `data = ..` assignment would work fine.
@@ -39,7 +40,7 @@ But that's not how we do Ajax. We make an asynchronous Ajax request *now*, and w
 The simplest (but definitely not only, or necessarily even best!) way of "waiting" from *now* until *later* is to use a function, commonly called a callback function:
 
 ```js
-// ajax(..) is some arbitrary Ajax function given by some library
+// ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", function myCallbackFunction(data){
 
 	console.log( data ); // Yay, I gots me some `data`!
@@ -47,7 +48,7 @@ ajax( "http://some.url.1", function myCallbackFunction(data){
 } );
 ```
 
-**Note:** You may have heard that it's possible to make synchronous Ajax requests. While that's technically true, you should never, ever do it, under any circumstances, because it locks the browser UI (buttons, menus, scrolling, etc.) and prevents any user interaction whatsoever. This is a terrible idea, and should always be avoided.
+**Warning:** You may have heard that it's possible to make synchronous Ajax requests. While that's technically true, you should never, ever do it, under any circumstances, because it locks the browser UI (buttons, menus, scrolling, etc.) and prevents any user interaction whatsoever. This is a terrible idea, and should always be avoided.
 
 Before you protest in disagreement, no, your desire to avoid the mess of callbacks is *not* justification for blocking, synchronous Ajax.
 
@@ -115,7 +116,7 @@ console.log( a ); // ??
 a.index++;
 ```
 
-We'd normally expect to see the `a` object be snapshotted at the exact moment of the `console.log(..)` statement, printing something like `{ index: 1 }`, such that in the next statment when `a.index++` happens, it's modifying something different than, or just strictly after, the output of `a`.
+We'd normally expect to see the `a` object be snapshotted at the exact moment of the `console.log(..)` statement, printing something like `{ index: 1 }`, such that in the next statement when `a.index++` happens, it's modifying something different than, or just strictly after, the output of `a`.
 
 Most of the time, the preceding code will probably produce an object representation in your developer tools' console that's what you'd expect. But it's possible this same code could run in a situation where the browser felt it needed to defer the console I/O to the background, in which case it's *possible* that by the time the object is represented in the browser console, the `a.index++` has already happened, and it shows `{ index: 2 }`.
 
@@ -125,17 +126,17 @@ It's a moving target under what conditions exactly `console` I/O will be deferre
 
 ## Event Loop
 
-Let's make a (perhaps shocking) claim: despite your clearly being able to write asynchronous JS code (like the timeout we just looked at), up until recently (ES6), JavaScript itself has actually never had any direct notion of asynchrony built into it.
+Let's make a (perhaps shocking) claim: despite clearly allowing asynchronous JS code (like the timeout we just looked at), up until recently (ES6), JavaScript itself has actually never had any direct notion of asynchrony built into it.
 
 **What!?** That seems like a crazy claim, right? In fact, it's quite true. The JS engine itself has never done anything more than execute a single chunk of your program at any given moment, when asked to.
 
 "Asked to." By whom? That's the important part!
 
-The JS engine doesn't run in isolation. It runs inside a *hosting environment*, which is for most developers the typical web browser. Over the last several years (but by no means exlusively), JS has expanded beyond the browser into other environments, such as servers, via things like Node.js. In fact, JavaScript gets embedded into all kinds of devices these days, from robots to lightbulbs.
+The JS engine doesn't run in isolation. It runs inside a *hosting environment*, which is for most developers the typical web browser. Over the last several years (but by no means exclusively), JS has expanded beyond the browser into other environments, such as servers, via things like Node.js. In fact, JavaScript gets embedded into all kinds of devices these days, from robots to lightbulbs.
 
 But the one common "thread" (that's a not-so-subtle asynchronous joke, for what it's worth) of all these environments is that they have a mechanism in them that handles executing multiple chunks of your program *over time*, at each moment invoking the JS engine, called the "event loop."
 
-In other words, the JS engine has had no innate sense of *time*, but has instead been an on-demand execution environment for any arbitrary snippet of JS. It's the surrouding environment that has always *scheduled* "events" (JS code executions).
+In other words, the JS engine has had no innate sense of *time*, but has instead been an on-demand execution environment for any arbitrary snippet of JS. It's the surrounding environment that has always *scheduled* "events" (JS code executions).
 
 So, for example, when your JS program makes an Ajax request to fetch some data from a server, you set up the "response" code in a function (commonly called a "callback"), and the JS engine tells the hosting environment, "Hey, I'm going to suspend execution for now, but whenever you finish with that network request, and you have some data, please *call* this function *back*."
 
@@ -178,7 +179,7 @@ What if there are already 20 items in the event loop at that moment? Your callba
 
 So, in other words, your program is generally broken up into lots of small chunks, which happen one after the other in the event loop queue. And technically, other events not related directly to your program can be interleaved within the queue as well.
 
-**Note:** We mentioned "up until recently" in relation to ES6 changing the nature of where the event loop queue is managed. It's mostly a formal technicality, but ES6 now specifies exactly how the event loop works, which means technically it's within the purview of the JS engine, rather than just the *hosting environment*. One main reason for this change is the introduction of ES6 Promises, which we'll discuss in Chapter 3, because they require the ability to have direct, fine-grained control over scheduling operations on the event loop queue (see the discussion of `setTimeout(..0)` toward the end of this chapter).
+**Note:** We mentioned "up until recently" in relation to ES6 changing the nature of where the event loop queue is managed. It's mostly a formal technicality, but ES6 now specifies how the event loop works, which means technically it's within the purview of the JS engine, rather than just the *hosting environment*. One main reason for this change is the introduction of ES6 Promises, which we'll discuss in Chapter 3, because they require the ability to have direct, fine-grained control over scheduling operations on the event loop queue (see the discussion of `setTimeout(..0)` in the "Cooperation" section).
 
 ## Parallel Threading
 
@@ -216,7 +217,7 @@ function bar() {
 	a = a * 2;
 }
 
-// ajax(..) is some arbitrary Ajax function given by some library
+// ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", foo );
 ajax( "http://some.url.2", bar );
 ```
@@ -275,7 +276,7 @@ The result in `a` will be `21`.
 
 So, threaded programming is very tricky, because if you don't take special steps to prevent this kind of interruption/interleaving from happening, you can get very surprising, nondeterministic behavior that frequently leads to headaches.
 
-JavaScript never shares data accross threads, which means *that* level of nondeterminism isn't a concern. But that doesn't mean JS is always deterministic. Remember earlier, where the relative ordering of `foo()` and `bar()` produces two different results (`41` or `42`)?
+JavaScript never shares data across threads, which means *that* level of nondeterminism isn't a concern. But that doesn't mean JS is always deterministic. Remember earlier, where the relative ordering of `foo()` and `bar()` produces two different results (`41` or `42`)?
 
 **Note:** It may not be obvious yet, but not all nondeterminism is bad. Sometimes it's irrelevant, and sometimes it's intentional. We'll see more examples of that throughout this and the next few chapters.
 
@@ -301,7 +302,7 @@ function bar() {
 	b = a * 2;
 }
 
-// ajax(..) is some arbitrary Ajax function given by some library
+// ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", foo );
 ajax( "http://some.url.2", bar );
 ```
@@ -374,7 +375,7 @@ Two outcomes from the same code means we still have nondeterminism! But it's at 
 
 As applied to JavaScript's behavior, this function-ordering nondeterminism is the common term "race condition," as `foo()` and `bar()` are racing against each other to see which runs first. Specifically, it's a "race condition" because you cannot predict reliably how `a` and `b` will turn out.
 
-**Note:** If there was a function in JS which somehow did not have run-to-completion behavior, we could have many more possible outcomes, right? It turns out ES6 introduces just such a thing (see Chapter 4 "Generators"), but don't worry right now, we'll come back to that!
+**Note:** If there was a function in JS that somehow did not have run-to-completion behavior, we could have many more possible outcomes, right? It turns out ES6 introduces just such a thing (see Chapter 4 "Generators"), but don't worry right now, we'll come back to that!
 
 ## Concurrency
 
@@ -430,7 +431,7 @@ response 5
 response 7
 ```
 
-But, going back to our notion of the event loop from eariler in the chapter, JS is only going to be able to handle one event at a time, so either `onscroll, request 2` is going to happen first or `response 1` is going to happen first, but they cannot happen at literally the same moment. Just like kids at a school cafeteria, no matter what crowd they form outside the doors, they'll have to merge into a single line to get their lunch!
+But, going back to our notion of the event loop from earlier in the chapter, JS is only going to be able to handle one event at a time, so either `onscroll, request 2` is going to happen first or `response 1` is going to happen first, but they cannot happen at literally the same moment. Just like kids at a school cafeteria, no matter what crowd they form outside the doors, they'll have to merge into a single line to get their lunch!
 
 Let's visualize the interleaving of all these events onto the event loop queue.
 
@@ -475,7 +476,7 @@ function bar(results) {
 	res.bar = results;
 }
 
-// ajax(..) is some arbitrary Ajax function given by some library
+// ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", foo );
 ajax( "http://some.url.2", bar );
 ```
@@ -497,7 +498,7 @@ function response(data) {
 	res.push( data );
 }
 
-// ajax(..) is some arbitrary Ajax function given by some library
+// ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", response );
 ajax( "http://some.url.2", response );
 ```
@@ -522,7 +523,7 @@ function response(data) {
 	}
 }
 
-// ajax(..) is some arbitrary Ajax function given by some library
+// ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", response );
 ajax( "http://some.url.2", response );
 ```
@@ -550,7 +551,7 @@ function baz() {
 	console.log(a + b);
 }
 
-// ajax(..) is some arbitrary Ajax function given by some library
+// ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", foo );
 ajax( "http://some.url.2", bar );
 ```
@@ -580,7 +581,7 @@ function baz() {
 	console.log( a + b );
 }
 
-// ajax(..) is some arbitrary Ajax function given by some library
+// ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", foo );
 ajax( "http://some.url.2", bar );
 ```
@@ -608,7 +609,7 @@ function baz() {
 	console.log( a );
 }
 
-// ajax(..) is some arbitrary Ajax function given by some library
+// ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", foo );
 ajax( "http://some.url.2", bar );
 ```
@@ -621,14 +622,14 @@ So, we can coordinate the interaction with a simple latch, to let only the first
 var a;
 
 function foo(x) {
-	if (!a) {
+	if (a == undefined) {
 		a = x * 2;
 		baz();
 	}
 }
 
 function bar(x) {
-	if (!a) {
+	if (a == undefined) {
 		a = x / 2;
 		baz();
 	}
@@ -638,12 +639,12 @@ function baz() {
 	console.log( a );
 }
 
-// ajax(..) is some arbitrary Ajax function given by some library
+// ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", foo );
 ajax( "http://some.url.2", bar );
 ```
 
-The `if (!a)` conditional allows only the first of `foo()` or `bar()` through, and the second (and indeed any subsequent) calls would just be ignored. There's just no virtue in coming in second place!
+The `if (a == undefined)` conditional allows only the first of `foo()` or `bar()` through, and the second (and indeed any subsequent) calls would just be ignored. There's just no virtue in coming in second place!
 
 **Note:** In all these scenarios, we've been using global variables for simplistic illustration purposes, but there's nothing about our reasoning here that requires it. As long as the functions in question can access the variables (via scope), they'll work as intended. Relying on lexically scoped variables (see the *Scope & Closures* title of this book series), and in fact global variables as in these examples, is one obvious downside to these forms of concurrency coordination. As we go through the next few chapters, we'll see other ways of coordination that are much cleaner in that respect.
 
@@ -656,7 +657,7 @@ For example, consider an Ajax response handler that needs to run through a long 
 ```js
 var res = [];
 
-// `response(..)` receives an array of results from the Ajax call
+// `response(..)` receives array of results from the Ajax call
 function response(data) {
 	// add onto existing `res` array
 	res = res.concat(
@@ -667,7 +668,7 @@ function response(data) {
 	);
 }
 
-// ajax(..) is some arbitrary Ajax function given by some library
+// ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", response );
 ajax( "http://some.url.2", response );
 ```
@@ -683,7 +684,7 @@ Here's a very simple approach:
 ```js
 var res = [];
 
-// `response(..)` receives an array of results from the Ajax call
+// `response(..)` receives array of results from the Ajax call
 function response(data) {
 	// let's just do 1000 at a time
 	var chunk = data.splice( 0, 1000 );
@@ -705,7 +706,7 @@ function response(data) {
 	}
 }
 
-// ajax(..) is some arbitrary Ajax function given by some library
+// ajax(..) is some arbitrary Ajax function given by a library
 ajax( "http://some.url.1", response );
 ajax( "http://some.url.2", response );
 ```
@@ -734,7 +735,7 @@ A Job can also cause more Jobs to be added to the end of the same queue. So, it'
 
 Jobs are kind of like the spirit of the `setTimeout(..0)` hack, but implemented in such a way as to have a much more well-defined and guaranteed ordering: **later, but as soon as possible**.
 
-Let's pretend for a moment there was an API for scheduling Jobs (directly, without hacks), and let's call that API `schedule(..)`. Consider:
+Let's imagine an API for scheduling Jobs (directly, without hacks), and call it `schedule(..)`. Consider:
 
 ```js
 console.log( "A" );
@@ -763,7 +764,7 @@ The order in which we express statements in our code is not necessarily the same
 
 But before we do, we should be crystal clear on something: the rules/grammar of the language (see the *Types & Grammar* title of this book series) dictate a very predictable and reliable behavior for statement ordering from the program point of view. So what we're about to discuss are **not things you should ever be able to observe** in your JS program.
 
-**Note:** If you are ever able to *observe* compiler statement reordering like we're about to illustrate, that'd be a clear violation of the specification, and it would unquestionably be due to a bug in the JS engine in question -- one which should promptly be reported and fixed! But it's vastly more common that you *suspect* something crazy is happening in the JS engine, when in fact it's just a bug (probably a "race condition"!) in your own code -- so look there first, and again and again. The JS debugger, using breakpoints and stepping through code line by line, will be your most powerful tool for sniffing out such bugs in *your code*.
+**Warning:** If you are ever able to *observe* compiler statement reordering like we're about to illustrate, that'd be a clear violation of the specification, and it would unquestionably be due to a bug in the JS engine in question -- one which should promptly be reported and fixed! But it's vastly more common that you *suspect* something crazy is happening in the JS engine, when in fact it's just a bug (probably a "race condition"!) in your own code -- so look there first, and again and again. The JS debugger, using breakpoints and stepping through code line by line, will be your most powerful tool for sniffing out such bugs in *your code*.
 
 Consider:
 

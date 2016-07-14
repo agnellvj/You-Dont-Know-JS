@@ -2,6 +2,7 @@
 
 ## Table of Contents
 
+* Foreword
 * Preface
 * Chapter 1: Into Programming
 	* Code
@@ -31,4 +32,4 @@
 	* Types & Grammar
 	* Async & Performance
 	* ES6 & Beyond
-* Appendix A: Thank You's!
+* Appendix A: Acknowledgments

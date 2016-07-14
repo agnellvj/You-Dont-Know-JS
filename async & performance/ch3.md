@@ -1,7 +1,7 @@
 # You Don't Know JS: Async & Performance
 # Chapter 3: Promises
 
-In Chapter 2, we identified two major categories of deficiencies with using callbacks to express program asynchrony and manage concurrency: lack of trustability and lack of sequentiality. Now that we understand the problems more intimately, it's time we turn our attention to patterns that can address them.
+In Chapter 2, we identified two major categories of deficiencies with using callbacks to express program asynchrony and manage concurrency: lack of sequentiality and lack of trustability. Now that we understand the problems more intimately, it's time we turn our attention to patterns that can address them.
 
 The issue we want to address first is the *inversion of control*, the trust that is so fragilely held and so easily lost.
 
@@ -31,7 +31,7 @@ With that in mind, let's look at two different analogies for what a Promise *is*
 
 Imagine this scenario: I walk up to the counter at a fast-food restaurant, and place an order for a cheeseburger. I hand the cashier $1.47. By placing my order and paying for it, I've made a request for a *value* back (the cheeseburger). I've started a transaction.
 
-But often, the chesseburger is not immediately available for me. The cashier hands me something in place of my cheeseburger: a receipt with an order number on it. This order number is an IOU ("I owe you") *promise* that ensures that eventually, I should receive my cheeseburger.
+But often, the cheeseburger is not immediately available for me. The cashier hands me something in place of my cheeseburger: a receipt with an order number on it. This order number is an IOU ("I owe you") *promise* that ensures that eventually, I should receive my cheeseburger.
 
 So I hold onto my receipt and order number. I know it represents my *future cheeseburger*, so I don't need to worry about it anymore -- aside from being hungry!
 
@@ -53,14 +53,14 @@ Every time I order a cheeseburger, I know that I'll either get a cheeseburger ev
 
 This all might sound too mentally abstract to apply to your code. So let's be more concrete.
 
-However, before we can introduce how Promises work in this fashion, we're going to derive in code we already understand -- callbacks! -- how to handle these *future values*.
+However, before we can introduce how Promises work in this fashion, we're going to derive in code that we already understand -- callbacks! -- how to handle these *future values*.
 
 When you write code to reason about a value, such as performing math on a `number`, whether you realize it or not, you've been assuming something very fundamental about that value, which is that it's a concrete *now* value already:
 
 ```js
 var x, y = 2;
 
-console.log( x + y ); // NaN  <-- because `x` isn't set (ready) yet
+console.log( x + y ); // NaN  <-- because `x` isn't set yet
 ```
 
 The `x + y` operation assumes both `x` and `y` are already set. In terms we'll expound on shortly, we assume the `x` and `y` values are already *resolved*.
@@ -153,7 +153,7 @@ There are two layers of Promises in this snippet.
 
 The second layer is the promise that `add(..)` creates (via `Promise.all([ .. ])`) and returns, which we wait on by calling `then(..)`. When the `add(..)` operation completes, our `sum` *future value* is ready and we can print it out. We hide inside of `add(..)` the logic for waiting on the `X` and `Y` *future values*.
 
-**Note:** Inside `add(..)`, the `Promise.all([ .. ])` call creates a promise (which is waiting on `promiseX` and `promiseY` to resolve). The chained call to `.then(..)` creates another promise, which the `return values[0] + values[1]` line immediately resolves (with the result of the addition). Thus, the `then(..)` call we chain off the end of the `add(..)` call -- at the end of the snippet -- is actually operating on that second promise returned, rather than the first one created by `Promise.all([ .. ])`. Also, though we are not chaining off the end of that second `then(..)`, it too has created another promise, had we chosen to observe/use it. This promise chaining stuff will be explained in much greater detail later in this chapter.
+**Note:** Inside `add(..)`, the `Promise.all([ .. ])` call creates a promise (which is waiting on `promiseX` and `promiseY` to resolve). The chained call to `.then(..)` creates another promise, which the `return values[0] + values[1]` line immediately resolves (with the result of the addition). Thus, the `then(..)` call we chain off the end of the `add(..)` call -- at the end of the snippet -- is actually operating on that second promise returned, rather than the first one created by `Promise.all([ .. ])`. Also, though we are not chaining off the end of that second `then(..)`, it too has created another promise, had we chosen to observe/use it. This Promise chaining stuff will be explained in much greater detail later in this chapter.
 
 Just like with cheeseburger orders, it's possible that the resolution of a Promise is rejection instead of fulfillment. Unlike a fulfilled Promise, where the value is always programmatic, a rejection value -- commonly called a "rejection reason" -- can either be set directly by the program logic, or it can result implicitly from a runtime exception.
 
@@ -195,7 +195,7 @@ We just simply need to know when `foo(..)` finishes so that we can move on to ou
 
 In typical JavaScript fashion, if you need to listen for a notification, you'd likely think of that in terms of events. So we could reframe our need for notification as a need to listen for a *completion* (or *continuation*) event emitted by `foo(..)`.
 
-**Note:** Whether you call it a "completion event" or a "continuation event" depends on your perspective. Is the focus more on what happens with `foo(..)`, or what happens *after* `foo(..)` finishes? Both perspectives are accurate and useful. The event notification tells us that `foo(..)` has *completed*, but also that it's OK to *continue* with the next step. Indeed, the callback you pass to be called for the event notification is itself what we've previously called a *continuation*. Because *completion event* is a bit more focused on the `foo()`, which more has our attention at present, we slightly favor *completion event* for the rest of this text.
+**Note:** Whether you call it a "completion event" or a "continuation event" depends on your perspective. Is the focus more on what happens with `foo(..)`, or what happens *after* `foo(..)` finishes? Both perspectives are accurate and useful. The event notification tells us that `foo(..)` has *completed*, but also that it's OK to *continue* with the next step. Indeed, the callback you pass to be called for the event notification is itself what we've previously called a *continuation*. Because *completion event* is a bit more focused on the `foo(..)`, which more has our attention at present, we slightly favor *completion event* for the rest of this text.
 
 With callbacks, the "notification" would be our callback invoked by the task (`foo(..)`). But with Promises, we turn the relationship around, and expect that we can listen for an event from `foo(..)`, and when notified, proceed accordingly.
 
@@ -314,7 +314,7 @@ function bar(fooPromise) {
 // ditto for `baz(..)`
 ```
 
-**Note:** Promise resolution doesn't necessarily need to involve sending along a message, as it did when we were examining Promises as *future values*. It can just be a flow-control signal, as used previously.
+Promise resolution doesn't necessarily need to involve sending along a message, as it did when we were examining Promises as *future values*. It can just be a flow-control signal, as used in the previous snippet.
 
 Another way to approach this is:
 
@@ -348,7 +348,7 @@ In the second snippet, `bar(..)` only gets called if `foo(..)` succeeds, and oth
 
 Neither approach is *correct* per se. There will be cases where one is preferred over the other.
 
-In either case, the promise `p` that comes back from `foo(..)` is used to control, via "event notifications," what happens next.
+In either case, the promise `p` that comes back from `foo(..)` is used to control what happens next.
 
 Moreover, the fact that both snippets end up calling `then(..)` twice against the same promise `p` illustrates the point made earlier, which is that Promises (once resolved) retain their same resolution (fulfillment or rejection) forever, and can subsequently be observed as many times as necessary.
 
@@ -360,9 +360,9 @@ In Promises-land, an important detail is how to know for sure if some value is a
 
 Given that Promises are constructed by the `new Promise(..)` syntax, you might think that `p instanceof Promise` would be an acceptable check. But unfortunately, there are a number of reasons that's not totally sufficient.
 
-Mainly, you can receive a Promise value from another browser window (iframe, etc.), which would have its own `Promise` different from the one in the current window/frame, and that check would fail to identify the Promise instance.
+Mainly, you can receive a Promise value from another browser window (iframe, etc.), which would have its own Promise different from the one in the current window/frame, and that check would fail to identify the Promise instance.
 
-Moreover, a library or framework may choose to vend its own Promises and not use the native ES6 `Promise` implementation to do so. In fact, you may very well be using Promises with libraries in older browsers that have no `Promise` at all.
+Moreover, a library or framework may choose to vend its own Promises and not use the native ES6 `Promise` implementation to do so. In fact, you may very well be using Promises with libraries in older browsers that have no Promise at all.
 
 When we discuss Promise resolution processes later in this chapter, it will become more obvious why a non-genuine-but-Promise-like value would still be very important to be able to recognize and assimilate. But for now, just take my word for it that it's a critical piece of the puzzle.
 
@@ -418,15 +418,15 @@ var v1 = { hello: "world" };
 var v2 = [ "Hello", "World" ];
 ```
 
-Both `v1` and `v2` will be assumed to be thenables. You can't control or predict if any other code accidentally or maliciously adds `then()` to `Object.prototype`, `Array.prototype`, or any of the other native prototypes. And if what's specified is a function that doesn't call either of its parameters as callbacks, then any Promise resolved with such a value will just silently hang forever! Crazy.
+Both `v1` and `v2` will be assumed to be thenables. You can't control or predict if any other code accidentally or maliciously adds `then(..)` to `Object.prototype`, `Array.prototype`, or any of the other native prototypes. And if what's specified is a function that doesn't call either of its parameters as callbacks, then any Promise resolved with such a value will just silently hang forever! Crazy.
 
 Sound implausible or unlikely? Perhaps.
 
-But keep in mind that there were several well-known non-Promise libraries preexisting in the community prior to ES6 that happened to already have a method on them called `then()`. Some of those libraries chose to rename their own methods to avoid collision (that sucks!). Others have simply been relegated to the unfortunate status of "incompatible with Promise-based coding" in reward for their inability to change to get out of the way.
+But keep in mind that there were several well-known non-Promise libraries preexisting in the community prior to ES6 that happened to already have a method on them called `then(..)`. Some of those libraries chose to rename their own methods to avoid collision (that sucks!). Others have simply been relegated to the unfortunate status of "incompatible with Promise-based coding" in reward for their inability to change to get out of the way.
 
 The standards decision to hijack the previously nonreserved -- and completely general-purpose sounding -- `then` property name means that no value (or any of its delegates), either past, present, or future, can have a `then(..)` function present, either on purpose or by accident, or that value will be confused for a thenable in Promises systems, which will probably create bugs that are really hard to track down.
 
-**Warning:** I do not like how we ended up with duck typing of thenables for Promise recognition. There were other options, such as "branding" or even "anti-branding"; what we got seems like a worst-case compromise. But it's not all doom and gloom. Thenable duck typing can be helpful, as we'll see later. Just beware that thenable duck typing can be hazardous if it incorrectly identifies something as a Promise which isn't.
+**Warning:** I do not like how we ended up with duck typing of thenables for Promise recognition. There were other options, such as "branding" or even "anti-branding"; what we got seems like a worst-case compromise. But it's not all doom and gloom. Thenable duck typing can be helpful, as we'll see later. Just beware that thenable duck typing can be hazardous if it incorrectly identifies something as a Promise that isn't.
 
 ## Promise Trust
 
@@ -477,7 +477,7 @@ p.then( function(){
 
 Here, `"C"` cannot interrupt and precede `"B"`, by virtue of how Promises are defined to operate.
 
-------------------------
+#### Promise Scheduling Quirks
 
 It's important to note, though, that there are lots of nuances of scheduling where the relative ordering between callbacks chained off two separate Promises is not reliably predictable.
 
@@ -492,7 +492,7 @@ var p1 = new Promise( function(resolve,reject){
 	resolve( p3 );
 } );
 
-p2 = new Promise( function(resolve,reject){
+var p2 = new Promise( function(resolve,reject){
 	resolve( "A" );
 } );
 
@@ -554,7 +554,7 @@ Importantly, we can ensure a signal as to the outcome of `foo()`, to prevent it 
 
 ### Calling Too Few or Too Many Times
 
-By definition, one is the appropriate number of times for the callback to be called. The "too few" case would be zero calls, which is the same as the "never" case we just examined.
+By definition, *one* is the appropriate number of times for the callback to be called. The "too few" case would be zero calls, which is the same as the "never" case we just examined.
 
 The "too many" case is easy to explain. Promises are defined so that they can only be resolved once. If for some reason the Promise creation code tries to call `resolve(..)` or `reject(..)` multiple times, or tries to call both, the Promise will accept only the first resolution, and will silently ignore any subsequent attempts.
 
@@ -589,10 +589,10 @@ var p = new Promise( function(resolve,reject){
 } );
 
 p.then(
-	function(){
+	function fulfilled(){
 		// never gets here :(
 	},
-	function(err){
+	function rejected(err){
 		// `err` will be a `TypeError` exception object
 		// from the `foo.bar()` line.
 	}
@@ -611,11 +611,11 @@ var p = new Promise( function(resolve,reject){
 } );
 
 p.then(
-	function(msg){
+	function fulfilled(msg){
 		foo.bar();
 		console.log( msg );	// never gets here :(
 	},
-	function(err){
+	function rejected(err){
 		// never gets here either :(
 	}
 );
@@ -673,10 +673,10 @@ var p = {
 // this works OK, but only by good fortune
 p
 .then(
-	function(val){
+	function fulfilled(val){
 		console.log( val ); // 42
 	},
-	function(err){
+	function rejected(err){
 		// never gets here
 	}
 );
@@ -694,10 +694,10 @@ var p = {
 
 p
 .then(
-	function(val){
+	function fulfilled(val){
 		console.log( val ); // 42
 	},
-	function(err){
+	function rejected(err){
 		// oops, shouldn't have run
 		console.log( err ); // evil laugh
 	}
@@ -711,10 +711,10 @@ Nonetheless, we can pass either of these versions of `p` to `Promise.resolve(..)
 ```js
 Promise.resolve( p )
 .then(
-	function(val){
+	function fulfilled(val){
 		console.log( val ); // 42
 	},
-	function(err){
+	function rejected(err){
 		// never gets here
 	}
 );
@@ -744,7 +744,7 @@ Promise.resolve( foo( 42 ) )
 
 Hopefully the previous discussion now fully "resolves" (pun intended) in your mind why the Promise is trustable, and more importantly, why that trust is so critical in building robust, maintainable software.
 
-Can you async code in JS without trust? Of course you can. We JS developers have been coding async with nothing but callbacks for nearly two decades.
+Can you write async code in JS without trust? Of course you can. We JS developers have been coding async with nothing but callbacks for nearly two decades.
 
 But once you start questioning just how much you can trust the mechanisms you build upon to actually be predictable and reliable, you start to realize callbacks have a pretty shaky trust foundation.
 
@@ -752,7 +752,7 @@ Promises are a pattern that augments callbacks with trustable semantics, so that
 
 ## Chain Flow
 
-We've hinted at this a couple of times already, but Promises do not have to be considered only as a mechanism for a single-step *this-then-that* sort of operation. That's the building block, of course, but it turns out we can string multiple Promises together to represent a sequence of async steps.
+We've hinted at this a couple of times already, but Promises are not just a mechanism for a single-step *this-then-that* sort of operation. That's the building block, of course, but it turns out we can string multiple Promises together to represent a sequence of async steps.
 
 The key to making this work is built on two behaviors intrinsic to Promises:
 
@@ -803,7 +803,7 @@ But there's something missing here. What if we want step 2 to wait for step 1 to
 
 The key to making a Promise sequence truly async capable at every step is to recall how `Promise.resolve(..)` operates when what you pass to it is a Promise or thenable instead of a final value. `Promise.resolve(..)` directly returns a received genuine Promise, or it unwraps the value of a received thenable -- and keeps going recursively while it keeps unwrapping thenables.
 
-The same sort of unwrapping happens if you `return` a thenable or Promise from the fulfillment (or rejection) callback. Consider:
+The same sort of unwrapping happens if you `return` a thenable or Promise from the fulfillment (or rejection) handler. Consider:
 
 ```js
 var p = Promise.resolve( 21 );
@@ -858,20 +858,20 @@ function delay(time) {
 	} );
 }
 
-delay( 100 )
-.then( function(){
-	console.log( "step 1 (after 100ms)" );
+delay( 100 ) // step 1
+.then( function STEP2(){
+	console.log( "step 2 (after 100ms)" );
 	return delay( 200 );
 } )
-.then( function(){
-	console.log( "step 2 (after another 200ms)" );
+.then( function STEP3(){
+	console.log( "step 3 (after another 200ms)" );
 } )
-.then( function(){
-	console.log( "step 3 (next Job)" );
+.then( function STEP4(){
+	console.log( "step 4 (next Job)" );
 	return delay( 50 );
 } )
-.then( function(){
-	console.log( "step 4 (after another 50ms)" );
+.then( function STEP5(){
+	console.log( "step 5 (after another 50ms)" );
 } )
 ...
 ```
@@ -909,15 +909,15 @@ request( "http://some.url.1/" )
 } );
 ```
 
-**Note:** Developers commonly encounter situations in which they want to do Promise-aware async flow control with utilities that are not themselves Promise-enabled (like `ajax(..)` here, which expects a callback). Although the native ES6 `Promise` mechanism doesn't automatically solve this pattern for us, practically all Promise libraries *do*. They usually call this process "lifting" or "promisifying" or some variation thereof. We'll come back to that pattern later.
+**Note:** Developers commonly encounter situations in which they want to do Promise-aware async flow control with utilities that are not themselves Promise-enabled (like `ajax(..)` here, which expects a callback). Although the native ES6 `Promise` mechanism doesn't automatically solve this pattern for us, practically all Promise libraries *do*. They usually call this process "lifting" or "promisifying" or some variation thereof. We'll come back to this technique later.
 
 Using the Promise-returning `request(..)`, we create the first step in our chain implicitly by calling it with the first URL, and chain off that returned promise with the first `then(..)`.
 
-Once `response1` comes back, we use that value to construct a second URL, and make a second `request(..)` call. That second `request(..)` promise is `return`ed so that the second step in our async flow control waits for that Ajax call to complete. Finally, we print `response2` once it returns.
+Once `response1` comes back, we use that value to construct a second URL, and make a second `request(..)` call. That second `request(..)` promise is `return`ed so that the third step in our async flow control waits for that Ajax call to complete. Finally, we print `response2` once it returns.
 
 The Promise chain we construct is not only a flow control that expresses a multistep async sequence, but it also acts as a message channel to propagate messages from step to step.
 
-What if something went wrong in one of the steps of the Promise chain? An error/exception is on a per-Promise basis, which means it's possible to catch such an error at some point in the chain, and that catching acts to sort of "reset" the chain back to normal operation at that point:
+What if something went wrong in one of the steps of the Promise chain? An error/exception is on a per-Promise basis, which means it's possible to catch such an error at any point in the chain, and that catching acts to sort of "reset" the chain back to normal operation at that point:
 
 ```js
 // step 1:
@@ -933,11 +933,11 @@ request( "http://some.url.1/" )
 
 // step 3:
 .then(
-	function(response2){
+	function fulfilled(response2){
 		// never gets here
 	},
 	// rejection handler to catch the error
-	function(err){
+	function rejected(err){
 		console.log( err );	// `TypeError` from `foo.bar()` error
 		return 42;
 	}
@@ -951,9 +951,9 @@ request( "http://some.url.1/" )
 
 When the error occurs in step 2, the rejection handler in step 3 catches it. The return value (`42` in this snippet), if any, from that rejection handler fulfills the promise for the next step (4), such that the chain is now back in a fulfillment state.
 
-**Note:** As we discussed earlier, when returning a Promise from a fulfillment handler, it's unwrapped and can delay the next step. That's also true for returning Promises from rejection handlers, such that if the `return 42` in step 3 instead returned a promise, that promise could delay step 4. A thrown exception inside either the fulfillment or rejection handler of a `then(..)` call causes the next (chained) Promise to be immediately rejected with that exception.
+**Note:** As we discussed earlier, when returning a promise from a fulfillment handler, it's unwrapped and can delay the next step. That's also true for returning promises from rejection handlers, such that if the `return 42` in step 3 instead returned a promise, that promise could delay step 4. A thrown exception inside either the fulfillment or rejection handler of a `then(..)` call causes the next (chained) promise to be immediately rejected with that exception.
 
-If you call `then(..)` on a Promise, and you only pass a fulfillment handler to it, an assumed rejection handler is substituted:
+If you call `then(..)` on a promise, and you only pass a fulfillment handler to it, an assumed rejection handler is substituted:
 
 ```js
 var p = new Promise( function(resolve,reject){
@@ -961,7 +961,7 @@ var p = new Promise( function(resolve,reject){
 } );
 
 var p2 = p.then(
-	function(){
+	function fulfilled(){
 		// never gets here
 	}
 	// assumed rejection handler, if omitted or
@@ -988,7 +988,7 @@ p.then(
 	//     return v;
 	// }
 	null,
-	function(err){
+	function rejected(err){
 		// never gets here
 	}
 );
@@ -1042,13 +1042,13 @@ var rejectedPr = Promise.reject( "Oops" );
 Let's now illustrate why the word "resolve" (such as in `Promise.resolve(..)`) is unambiguous and indeed more accurate, if used explicitly in a context that could result in either fulfillment or rejection:
 
 ```js
-var rejectedThenable = {
+var rejectedTh = {
 	then: function(resolved,rejected) {
 		rejected( "Oops" );
 	}
 };
 
-var rejectedPr = Promise.resolve( rejectedThenable );
+var rejectedPr = Promise.resolve( rejectedTh );
 ```
 
 As we discussed earlier in this chapter, `Promise.resolve(..)` will return a received genuine Promise directly, or unwrap a received thenable. If that thenable unwrapping reveals a rejected state, the Promise returned from `Promise.resolve(..)` is in fact in that same rejected state.
@@ -1064,10 +1064,10 @@ var rejectedPr = new Promise( function(resolve,reject){
 } );
 
 rejectedPr.then(
-	function(){
+	function fulfilled(){
 		// never gets here
 	},
-	function(err){
+	function rejected(err){
 		console.log( err );	// "Oops"
 	}
 );
@@ -1075,7 +1075,7 @@ rejectedPr.then(
 
 It should be clear now that `resolve(..)` is the appropriate name for the first callback parameter of the `Promise(..)` constructor.
 
-**Note:** The previously mentioned `reject(..)` does **not** do the unwrapping that `resolve(..)` does. If you pass a Promise/thenable value to `reject(..)`, that untouched value will be set as the rejection reason. A subsequent rejection handler would receive the actual Promise/thenable you passed to `reject(..)`, not its underlying immediate value.
+**Warning:** The previously mentioned `reject(..)` does **not** do the unwrapping that `resolve(..)` does. If you pass a Promise/thenable value to `reject(..)`, that untouched value will be set as the rejection reason. A subsequent rejection handler would receive the actual Promise/thenable you passed to `reject(..)`, not its underlying immediate value.
 
 But now let's turn our attention to the callbacks provided to `then(..)`. What should they be called (both in literature and in code)? I would suggest `fulfilled(..)` and `rejected(..)`:
 
@@ -1157,12 +1157,10 @@ So we come back to error handling in Promises, with the rejection handler passed
 var p = Promise.reject( "Oops" );
 
 p.then(
-	// fulfilled
-	function(){
+	function fulfilled(){
 		// never gets here
 	},
-	// rejected
-	function(err){
+	function rejected(err){
 		console.log( err ); // "Oops"
 	}
 );
@@ -1176,12 +1174,12 @@ Consider:
 var p = Promise.resolve( 42 );
 
 p.then(
-	function(msg){
+	function fulfilled(msg){
 		// numbers don't have string functions,
 		// so will throw an error
 		console.log( msg.toLowerCase() );
 	},
-	function(err){
+	function rejected(err){
 		// never gets here
 	}
 );
@@ -1191,7 +1189,7 @@ If the `msg.toLowerCase()` legitimately throws an error (it does!), why doesn't 
 
 That should paint a clear picture of why error handling with Promises is error-prone (pun intended). It's far too easy to have errors swallowed, as this is very rarely what you'd intend.
 
-**Note:** If you use the Promise API in an invalid way and an error occurs that prevents proper Promise construction, the result will be an immediately thrown exception, **not a rejected Promise**. Some examples of incorrect usage that fail Promise construction: `new Promise(null)`, `Promise.all()`, `Promise.race(42)`, and so on. You can't get a rejected Promise if you don't use the Promise API validly enough to actually construct a Promise in the first place!
+**Warning:** If you use the Promise API in an invalid way and an error occurs that prevents proper Promise construction, the result will be an immediately thrown exception, **not a rejected Promise**. Some examples of incorrect usage that fail Promise construction: `new Promise(null)`, `Promise.all()`, `Promise.race(42)`, and so on. You can't get a rejected Promise if you don't use the Promise API validly enough to actually construct a Promise in the first place!
 
 ### Pit of Despair
 
@@ -1205,7 +1203,7 @@ To avoid losing an error to the silence of a forgotten/discarded Promise, some d
 var p = Promise.resolve( 42 );
 
 p.then(
-	function(msg){
+	function fulfilled(msg){
 		// numbers don't have string functions,
 		// so will throw an error
 		console.log( msg.toLowerCase() );
@@ -1230,7 +1228,7 @@ It's not exactly an easy problem to solve completely. There are other ways to ap
 
 Some Promise libraries have added methods for registering something like a "global unhandled rejection" handler, which would be called instead of a globally thrown error. But their solution for how to identify an error as "uncaught" is to have an arbitrary-length timer, say 3 seconds, running from time of rejection. If a Promise is rejected but no error handler is registered before the timer fires, then it's assumed that you won't ever be registering a handler, so it's "uncaught."
 
-In practice, this has worked well for many libraries, as most usage patterns don't typically call for significant delay between Promise rejection and observation of that rejection. But this pattern is troublesome because 3 seconds is so arbitrary (even if empirical), and also because there are indeed some cases where you want a Promise to hold on to its rejectedness for some arbitrary period of time, and you don't really want to have your "uncaught" handler called for all those false positives (not-yet-handled "uncaught errors").
+In practice, this has worked well for many libraries, as most usage patterns don't typically call for significant delay between Promise rejection and observation of that rejection. But this pattern is troublesome because 3 seconds is so arbitrary (even if empirical), and also because there are indeed some cases where you want a Promise to hold on to its rejectedness for some indefinite period of time, and you don't really want to have your "uncaught" handler called for all those false positives (not-yet-handled "uncaught errors").
 
 Another more common suggestion is that Promises should have a `done(..)` added to them, which essentially marks the Promise chain as "done." `done(..)` doesn't create and return a Promise, so the callbacks passed to `done(..)` are obviously not wired up to report problems to a chained Promise that doesn't exist.
 
@@ -1240,7 +1238,7 @@ So what happens instead? It's treated as you might usually expect in uncaught er
 var p = Promise.resolve( 42 );
 
 p.then(
-	function(msg){
+	function fulfilled(msg){
 		// numbers don't have string functions,
 		// so will throw an error
 		console.log( msg.toLowerCase() );
@@ -1269,7 +1267,7 @@ Is there any other alternative? Yes.
 The following is just theoretical, how Promises *could* be someday changed to behave. I believe it would be far superior to what we currently have. And I think this change would be possible even post-ES6 because I don't think it would break web compatibility with ES6 Promises. Moreover, it can be polyfilled/prollyfilled in, if you're careful. Let's take a look:
 
 * Promises could default to reporting (to the developer console) any rejection, on the next Job or event loop tick, if at that exact moment no error handler has been registered for the Promise.
-* For the cases where you want a rejected Promise to hold onto its rejected state for an arbitrary amount of time before observing, you could call `defer()`, which suppresses automatic error reporting on that Promise.
+* For the cases where you want a rejected Promise to hold onto its rejected state for an indefinite amount of time before observing, you could call `defer()`, which suppresses automatic error reporting on that Promise.
 
 If a Promise is rejected, it defaults to noisily reporting that fact to the developer console (instead of defaulting to silence). You can opt out of that reporting either implicitly (by registering an error handler before rejection), or explicitly (with `defer()`). In either case, *you* control the false positives.
 
@@ -1281,10 +1279,10 @@ var p = Promise.reject( "Oops" ).defer();
 // `foo(..)` is Promise-aware
 foo( 42 )
 .then(
-	function(){
+	function fulfilled(){
 		return p;
 	},
-	function(err){
+	function rejected(err){
 		// handle `foo(..)` error
 	}
 );
@@ -1357,13 +1355,13 @@ While `Promise.all([ .. ])` coordinates multiple Promises concurrently and assum
 
 This pattern is classically called a "latch," but in Promises it's called a "race."
 
-**Note:** While the metaphor of "only the first across the finish line wins" fits the behavior well, unfortunately "race" is kind of a loaded term, because "race conditions" are generally taken as bugs in programs (see Chapter 1). Don't confuse `Promise.race([..])` with "race condition."
+**Warning:** While the metaphor of "only the first across the finish line wins" fits the behavior well, unfortunately "race" is kind of a loaded term, because "race conditions" are generally taken as bugs in programs (see Chapter 1). Don't confuse `Promise.race([ .. ])` with "race condition."
 
 `Promise.race([ .. ])` also expects a single `array` argument, containing one or more Promises, thenables, or immediate values. It doesn't make much practical sense to have a race with immediate values, because the first one listed will obviously win -- like a foot race where one runner starts at the finish line!
 
 Similar to `Promise.all([ .. ])`, `Promise.race([ .. ])` will fulfill if and when any Promise resolution is a fulfillment, and it will reject if and when any Promise resolution is a rejection.
 
-**Note:** A "race" requires at least one "runner," so if you pass an empty `array`, instead of immediately resolving, the main `race([..])` Promise will never resolve. This is a footgun! ES6 should have specified that it either fulfills, rejects, or just throws some sort of synchronous error. Unfortunately, because of precedence in Promise libraries predating ES6 `Promise`, they had to leave this gotcha in there, so be careful never to send in an empty `array`.
+**Warning:** A "race" requires at least one "runner," so if you pass an empty `array`, instead of immediately resolving, the main `race([..])` Promise will never resolve. This is a footgun! ES6 should have specified that it either fulfills, rejects, or just throws some sort of synchronous error. Unfortunately, because of precedence in Promise libraries predating ES6 `Promise`, they had to leave this gotcha in there, so be careful never to send in an empty `array`.
 
 Let's revisit our previous concurrent Ajax example, but in the context of a race between `p1` and `p2`:
 
@@ -1446,11 +1444,11 @@ if (!Promise.observe) {
 	Promise.observe = function(pr,cb) {
 		// side-observe `pr`'s resolution
 		pr.then(
-			function(msg){
+			function fulfilled(msg){
 				// schedule callback async (as Job)
 				Promise.resolve( msg ).then( cb );
 			},
-			function(err){
+			function rejected(err){
 				// schedule callback async (as Job)
 				Promise.resolve( err ).then( cb );
 			}
@@ -1573,7 +1571,7 @@ Promise.map( [p1,p2,p3], function(pr,done){
 
 Let's review the ES6 `Promise` API that we've already seen unfold in bits and pieces throughout this chapter.
 
-**Note:** The following API is native only to ES6, but there are specification-compliant polyfills (not just extended Promise libraries) which can define `Promise` and all its associated behavior so that you can use native Promises even in pre-ES6 browsers. One such polyfill is "Native-Promise-Only" (http://github.com/getify/native-promise-only), which I wrote!
+**Note:** The following API is native only as of ES6, but there are specification-compliant polyfills (not just extended Promise libraries) which can define `Promise` and all its associated behavior so that you can use native Promises even in pre-ES6 browsers. One such polyfill is "Native Promise Only" (http://github.com/getify/native-promise-only), which I wrote!
 
 ### new Promise(..) Constructor
 
@@ -1602,7 +1600,7 @@ var p1 = new Promise( function(resolve,reject){
 var p2 = Promise.reject( "Oops" );
 ```
 
-`Promise.resolve(..)` is usually used to create an already-fulfilled Promise in a similar way to `Promise.reject(..)`. However, `Promise.resolve(..)` also unwraps thenable values (as discusssed several times already). In that case, the Promise returned adopts the final resolution of the thenable you passed in, which could either be fulfillment or rejection:
+`Promise.resolve(..)` is usually used to create an already-fulfilled Promise in a similar way to `Promise.reject(..)`. However, `Promise.resolve(..)` also unwraps thenable values (as discussed several times already). In that case, the Promise returned adopts the final resolution of the thenable you passed in, which could either be fulfillment or rejection:
 
 ```js
 var fulfilledTh = {
@@ -1670,7 +1668,7 @@ Promise.all( [p1,p2] )
 } );
 ```
 
-**Note:** Be careful! If an empty `array` is passed to `Promise.all([ .. ])`, it will fulfill immediately, but `Promise.race([ .. ])` will hang forever and never resolve.
+**Warning:** Be careful! If an empty `array` is passed to `Promise.all([ .. ])`, it will fulfill immediately, but `Promise.race([ .. ])` will hang forever and never resolve.
 
 The ES6 `Promise` API is pretty simple and straightforward. It's at least good enough to serve the most basic of async cases, and is a good place to start when rearranging your code from callback hell to something better.
 
@@ -1686,18 +1684,18 @@ We covered Promise-flavored error handling in detail earlier in this chapter. Th
 
 But there's something else to consider with Promise errors. Because a Promise chain is nothing more than its constituent Promises wired together, there's no entity to refer to the entire chain as a single *thing*, which means there's no external way to observe any errors that may occur.
 
-If you construct a Promise chain that has no error handling in it, any error anywhere in the chain will propagate indefinitely down the chain, until observed (by registering a rejection handler at some step). So, in that specific case, having a reference to the *last* Promise in the chain is enough (`p` in the following snippet), because you can register a rejection handler there, and it will be notified of any propagated errors:
+If you construct a Promise chain that has no error handling in it, any error anywhere in the chain will propagate indefinitely down the chain, until observed (by registering a rejection handler at some step). So, in that specific case, having a reference to the *last* promise in the chain is enough (`p` in the following snippet), because you can register a rejection handler there, and it will be notified of any propagated errors:
 
 ```js
-// `foo(..)`, `step1(..)` and `step(..)` are
+// `foo(..)`, `STEP2(..)` and `STEP3(..)` are
 // all promise-aware utilities
 
 var p = foo( 42 )
-.then( step2 )
-.then( step3 );
+.then( STEP2 )
+.then( STEP3 );
 ```
 
-Although it may seem sneakily confusing, `p` here doesn't point to the first promise in the chain (the one from the `foo(42)` call), but instead from the last promise, the one that comes from the `then(step3)` call.
+Although it may seem sneakily confusing, `p` here doesn't point to the first promise in the chain (the one from the `foo(42)` call), but instead from the last promise, the one that comes from the `then(STEP3)` call.
 
 Also, no step in the promise chain is observably doing its own error handling. That means that you could then register a rejection error handler on `p`, and it would be notified if any errors occur anywhere in the chain:
 
@@ -1812,7 +1810,7 @@ Promise.all(
 ) );
 ```
 
-These tricks may be neat, but ES6 has an even better answer for us: destructuring. The array destructuring-assignment form looks like this:
+These tricks may be neat, but ES6 has an even better answer for us: destructuring. The array destructuring assignment form looks like this:
 
 ```js
 Promise.all(
@@ -1825,7 +1823,7 @@ Promise.all(
 } );
 ```
 
-But best of all, ES6 offers the array parameter-destructuring form:
+But best of all, ES6 offers the array parameter destructuring form:
 
 ```js
 Promise.all(
@@ -1838,13 +1836,15 @@ Promise.all(
 
 We've now embraced the one-value-per-Promise mantra, but kept our supporting boilerplate to a minimum!
 
+**Note:** For more information on ES6 destructuring forms, see the *ES6 & Beyond* title of this series.
+
 ### Single Resolution
 
-One of the most intrinsic behaviors of Promises is that a Promise can only be resolved once (fulfillment or rejection). For many async use cases, you're only retrieving a single value, so this works fine.
+One of the most intrinsic behaviors of Promises is that a Promise can only be resolved once (fulfillment or rejection). For many async use cases, you're only retrieving a value once, so this works fine.
 
 But there's also a lot of async cases that fit into a different model -- one that's more akin to events and/or streams of data. It's not clear on the surface how well Promises can fit into such use cases, if at all. Without a significant abstraction on top of Promises, they will completely fall short for handling multiple value resolution.
 
-Imagine a scenario where you might want to fire off a sequence of async steps in response to a stimuli (like an event) that can in fact happen multiple times, like a button click.
+Imagine a scenario where you might want to fire off a sequence of async steps in response to a stimulus (like an event) that can in fact happen multiple times, like a button click.
 
 This probably won't work the way you want:
 
@@ -1984,7 +1984,7 @@ function foo(x,y,cb) {
 		"http://some.url.1/?x=" + x + "&y=" + y
 	)
 	.then(
-		function(text){
+		function fulfilled(text){
 			cb( null, text );
 		},
 		cb
@@ -1998,10 +1998,10 @@ var betterFoo = Promise.wrap( foo );
 // and use the promisory
 betterFoo( 11, 31 )
 .then(
-	function(text){
+	function fulfilled(text){
 		console.log( text );
 	},
-	function(err){
+	function rejected(err){
 		console.error( err );
 	}
 );
@@ -2012,8 +2012,8 @@ Of course, while we're refactoring `foo(..)` to use our new `request(..)` promis
 Consider:
 
 ```js
-`foo(..)` is now also a promisory because it
-delegates to the `request(..)` promisory
+// `foo(..)` is now also a promisory because it
+// delegates to the `request(..)` promisory
 function foo(x,y) {
 	return request(
 		"http://some.url.1/?x=" + x + "&y=" + y

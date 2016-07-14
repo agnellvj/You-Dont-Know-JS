@@ -56,7 +56,7 @@ The point is, `new String("abc")` creates a string wrapper object around `"abc"`
 
 ## Internal `[[Class]]`
 
-Values that are `typeof` of `"object"` (such as an array) are additionally tagged with an internal `[[Class]]` property (think of this more as an internal *class*ification rather than related to classes from traditional class-oriented coding). This property cannot be accessed directly, but can generally can be revealed indirectly by borrowing the default `Object.prototype.toString(..)` method called against the value. For example:
+Values that are `typeof` `"object"` (such as an array) are additionally tagged with an internal `[[Class]]` property (think of this more as an internal *class*ification rather than related to classes from traditional class-oriented coding). This property cannot be accessed directly, but can generally be revealed indirectly by borrowing the default `Object.prototype.toString(..)` method called against the value. For example:
 
 ```js
 Object.prototype.toString.call( [1,2,3] );			// "[object Array]"
@@ -64,7 +64,7 @@ Object.prototype.toString.call( [1,2,3] );			// "[object Array]"
 Object.prototype.toString.call( /regex-literal/i );	// "[object RegExp]"
 ```
 
-So, for the array in this example, the internal `[[Class]]` value is `"Array"`, and for the regular expression, it's `"RegExp"`. In most cases, this internal `[Class]]` value corresponds to the built-in native constructor (see below) that's related to the value, but that's not always the case.
+So, for the array in this example, the internal `[[Class]]` value is `"Array"`, and for the regular expression, it's `"RegExp"`. In most cases, this internal `[[Class]]` value corresponds to the built-in native constructor (see below) that's related to the value, but that's not always the case.
 
 What about primitive values? First, `null` and `undefined`:
 
@@ -85,7 +85,7 @@ Object.prototype.toString.call( true );		// "[object Boolean]"
 
 In this snippet, each of the simple primitives are automatically boxed by their respective object wrappers, which is why `"String"`, `"Number"`, and `"Boolean"` are revealed as the respective internal `[[Class]]` values.
 
-**Note:** The behavior of `toString()` and `[[Class]]` as illustrated here has changed a bit from ES5 to ES6, but we cover those details in the *"ES6 & Beyond"* title of this series.
+**Note:** The behavior of `toString()` and `[[Class]]` as illustrated here has changed a bit from ES5 to ES6, but we cover those details in the *ES6 & Beyond* title of this series.
 
 ## Boxing Wrappers
 
@@ -273,7 +273,7 @@ Confused? Yeah. Here's roughly how it works.
 
 `apply(..)` is a utility available to all functions, which calls the function it's used with but in a special way.
 
-The first argument is a `this` object binding (covered in the *"this & Object Prototypes"* title of this series), which we don't care about here, so we set it to `null`. The second argument is supposed to be an array (or something *like* an array -- aka an "array-like object"). The contents of this "array" are "spread" out as arguments to the function in question.
+The first argument is a `this` object binding (covered in the *this & Object Prototypes* title of this series), which we don't care about here, so we set it to `null`. The second argument is supposed to be an array (or something *like* an array -- aka an "array-like object"). The contents of this "array" are "spread" out as arguments to the function in question.
 
 So, `Array.apply(..)` is calling the `Array(..)` function and spreading out the values (of the `{ length: 3 }` object value) as its arguments.
 
@@ -300,7 +300,7 @@ var d = { foo: "bar" };
 d; // { foo: "bar" }
 
 var e = new Function( "a", "return a * 2;" );
-var f = function(a) { return a * 2; }
+var f = function(a) { return a * 2; };
 function g(a) { return a * 2; }
 
 var h = new RegExp( "^a*b+", "g" );
@@ -328,7 +328,7 @@ The `Date(..)` and `Error(..)` native constructors are much more useful than the
 
 To create a date object value, you must use `new Date()`. The `Date(..)` constructor accepts optional arguments to specify the date/time to use, but if omitted, the current date/time is assumed.
 
-By far the most common reason you construct a date object is to get the current unix timestamp value (an integer number of seconds since Jan 1, 1970). You can do this by calling `getTime()` on a date object instance.
+By far the most common reason you construct a date object is to get the current timestamp value (a signed integer number of milliseconds since Jan 1, 1970). You can do this by calling `getTime()` on a date object instance.
 
 But an even easier way is to just call the static helper function defined as of ES5: `Date.now()`. And to polyfill that for pre-ES5 is pretty easy:
 
@@ -410,7 +410,7 @@ For example, all string objects, and by extension (via boxing) `string` primitiv
 
 None of the methods modify the string *in place*. Modifications (like case conversion or trimming) create a new value from the existing value.
 
-By virtue of prototype delegation (see the *"this & Object Prototypes"* title in this series), any string value can access these methods:
+By virtue of prototype delegation (see the *this & Object Prototypes* title in this series), any string value can access these methods:
 
 ```js
 var a = " abc ";
@@ -478,7 +478,7 @@ One minor side-benefit of this approach is that the `.prototype`s are already cr
 
 Also, be very careful not to use `Array.prototype` as a default value **that will subsequently be modified**. In this example, `vals` is used read-only, but if you were to instead make in-place changes to `vals`, you would actually be modifying `Array.prototype` itself, which would lead to the gotchas mentioned earlier!
 
-**Note:** While we're pointing out these native prototypes and some usefulness, be cautious of relying on them and even more wary of modifying them in anyway. See Appendix A "Native Prototypes" for more discussion.
+**Note:** While we're pointing out these native prototypes and some usefulness, be cautious of relying on them and even more wary of modifying them in any way. See Appendix A "Native Prototypes" for more discussion.
 
 ## Review
 

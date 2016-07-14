@@ -108,7 +108,7 @@ After almost a week of analysis/debugging, I found that the site in question had
 ```js
 // Netscape 4 doesn't have Array.push
 Array.prototype.push = function(item) {
-	this[this.length-1] = item;
+	this[this.length] = item;
 };
 ```
 
@@ -130,7 +130,7 @@ Next, don't unconditionally define extensions (because you can overwrite natives
 if (!Array.prototype.push) {
 	// Netscape 4 doesn't have Array.push
 	Array.prototype.push = function(item) {
-		this[this.length-1] = item;
+		this[this.length] = item;
 	};
 }
 ```
@@ -221,7 +221,7 @@ The one thing they *share* is the single `global` object (`window` in the browse
 
 So, if one `script` element defines a global function `foo()`, when a second `script` later runs, it can access and call `foo()` just as if it had defined the function itself.
 
-But global variable scope *hoisting* (see the *"Scope & Closures"* title of this series) does not occur across these boundaries, so the following code would not work (because `foo()`'s declaration isn't yet declared), regardless of if they are (as shown) inline `<script> .. </script>` elements or externally loaded `<script src=..></script>` files:
+But global variable scope *hoisting* (see the *Scope & Closures* title of this series) does not occur across these boundaries, so the following code would not work (because `foo()`'s declaration isn't yet declared), regardless of if they are (as shown) inline `<script> .. </script>` elements or externally loaded `<script src=..></script>` files:
 
 ```html
 <script>foo();</script>
